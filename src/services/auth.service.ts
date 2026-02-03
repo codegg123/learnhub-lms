@@ -19,37 +19,50 @@ export class AuthService {
     this.loadUsers();
     
     // Check localStorage for persisted session
-    const storedSession = localStorage.getItem('learnhub_session');
-    if (storedSession) {
-      this.currentUser.set(JSON.parse(storedSession));
+    try {
+      const storedSession = localStorage.getItem('learnhub_session');
+      if (storedSession) {
+        this.currentUser.set(JSON.parse(storedSession));
+      }
+    } catch (e) {
+      console.error('Failed to parse session', e);
+      localStorage.removeItem('learnhub_session');
     }
   }
 
   private loadUsers() {
-    const storedUsers = localStorage.getItem('learnhub_users');
-    if (storedUsers) {
-      this.users.set(JSON.parse(storedUsers));
-    } else {
-      // Initialize default users if none exist
-      const defaults: User[] = [
-        {
-          id: 'admin_1',
-          name: 'Administrator',
-          email: 'admin@learnhub.com',
-          role: 'admin',
-          password: 'admin' 
-        },
-        {
-          id: 'user_1',
-          name: 'Demo Student',
-          email: 'student@learnhub.com',
-          role: 'user',
-          password: 'user'
-        }
-      ];
-      this.users.set(defaults);
-      this.saveUsers();
+    try {
+      const storedUsers = localStorage.getItem('learnhub_users');
+      if (storedUsers) {
+        this.users.set(JSON.parse(storedUsers));
+      } else {
+        this.initDefaultUsers();
+      }
+    } catch (e) {
+      console.error('Failed to parse users', e);
+      this.initDefaultUsers();
     }
+  }
+
+  private initDefaultUsers() {
+    const defaults: User[] = [
+      {
+        id: 'admin_1',
+        name: 'Administrator',
+        email: 'admin@learnhub.com',
+        role: 'admin',
+        password: 'admin' 
+      },
+      {
+        id: 'user_1',
+        name: 'Demo Student',
+        email: 'student@learnhub.com',
+        role: 'user',
+        password: 'user'
+      }
+    ];
+    this.users.set(defaults);
+    this.saveUsers();
   }
 
   private saveUsers() {
